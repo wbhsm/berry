@@ -145,7 +145,8 @@ export const packageExtensions: Array<[string, PackageExtensionData]> = [
     },
   }],
   // https://github.com/react-component/animate/pull/89
-  [`rc-animate@*`, {
+  // TODO: Validate before merge
+  [`rc-animate@<=3.1.1`, {
     peerDependencies: {
       react: `^15.0.0 || ^16.0.0`,
       "react-dom": `^15.0.0 || ^16.0.0`,
