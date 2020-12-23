@@ -205,4 +205,10 @@ export const packageExtensions: Array<[string, PackageExtensionData]> = [
       [`react`]: `*`,
     },
   }],
+  // https://github.com/thinhle-agilityio/gatsby-source-apiserver/pull/58
+  [`gatsby-source-apiserver@<=2.1.7`, {
+    dependencies: {
+      [`babel-polyfill`]: `^6.26.0`,
+    },
+  }],
 ];
