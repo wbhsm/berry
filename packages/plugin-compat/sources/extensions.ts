@@ -237,4 +237,11 @@ export const packageExtensions: Array<[string, PackageExtensionData]> = [
       [`debug`]: `*`,
     },
   }],
+  // https://github.com/gatsbyjs/gatsby/pull/28759
+  // TODO: Validate before merge
+  [`gatsby-react-router-scroll@*`, {
+    dependencies: {
+      [`prop-types`]: `*`,
+    },
+  }],
 ];
