@@ -230,4 +230,11 @@ export const packageExtensions: Array<[string, PackageExtensionData]> = [
       [`webpack`]: `*`,
     },
   }],
+  // https://github.com/gatsbyjs/gatsby/pull/28759
+  // TODO: Validate before merge
+  [`gatsby-plugin-sharp@*`, {
+    dependencies: {
+      [`debug`]: `*`,
+    },
+  }],
 ];
