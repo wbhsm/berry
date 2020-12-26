@@ -224,4 +224,10 @@ export const packageExtensions: Array<[string, PackageExtensionData]> = [
       [`lodash`]: `^4`,
     },
   }],
+  // https://github.com/Creatiwity/gatsby-plugin-favicon/pull/65
+  [`gatsby-plugin-favicon@*`, {
+    peerDependencies: {
+      [`webpack`]: `*`,
+    },
+  }],
 ];
