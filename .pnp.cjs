@@ -38956,7 +38956,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
 return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 345:
+/***/ 807:
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -43897,6 +43897,14 @@ function applyPatch(pnpapi, opts) {
   }
 
   function getIssuerSpecsFromModule(module) {
+    if (module && !module.parent && !module.filename && module.paths.length > 0) {
+      return [{
+        apiPath: opts.manager.findApiPathFor(module.paths[0]),
+        path: module.paths[0],
+        module
+      }];
+    }
+
     const issuer = getIssuerModule(module);
     const issuerPath = issuer !== null ? npath.dirname(issuer.filename) : process.cwd();
     return [{
@@ -49750,7 +49758,7 @@ module.exports = require("path");;
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(345);
+/******/ 	return __webpack_require__(807);
 /******/ })()
 .default;
 });
