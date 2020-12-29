@@ -1,5 +1,6 @@
 import {ppath, Filename}                                                                                    from '@yarnpkg/fslib';
 import {FakeFS, NativePath, Path, PortablePath, VirtualFS, npath}                                           from '@yarnpkg/fslib';
+import {CachedInputFileSystem,ResolverFactory}                                                              from 'enhanced-resolve';
 import {Module}                                                                                             from 'module';
 
 import {PackageInformation, PackageLocator, PnpApi, RuntimeState, PhysicalPackageLocator, DependencyTarget} from '../types';
@@ -28,6 +29,24 @@ export type ResolveRequestOptions =
 export function makeApi(runtimeState: RuntimeState, opts: MakeApiOptions): PnpApi {
   const alwaysWarnOnFallback = Number(process.env.PNP_ALWAYS_WARN_ON_FALLBACK) > 0;
   const debugLevel = Number(process.env.PNP_DEBUG_LEVEL);
+
+  const cachedFS = new CachedInputFileSystem({
+    statSync(p: string) {
+      return opts.fakeFs.statSync(npath.toPortablePath(p));
+    },
+    lstatSync(p: string) {
+      return opts.fakeFs.lstatSync(npath.toPortablePath(p));
+    },
+    readdirSync(p: string, options: any) {
+      return opts.fakeFs.readdirSync(npath.toPortablePath(p), options);
+    },
+    readFileSync(p: string, options: any) {
+      return opts.fakeFs.readFileSync(npath.toPortablePath(p), options);
+    },
+    readlinkSync(p: string) {
+      return opts.fakeFs.readlinkSync(npath.toPortablePath(p));
+    },
+  });
 
   // @ts-expect-error
   const builtinModules = new Set(Module.builtinModules || Object.keys(process.binding(`natives`)));
@@ -784,6 +803,22 @@ export function makeApi(runtimeState: RuntimeState, opts: MakeApiOptions): PnpAp
 
     if (unqualifiedPath === null)
       return null;
+
+    if (!issuer)
+      throw new Error(`Assertion failed: expected 'resolveToUnqualified' to have filtered out null values`);
+
+    const resolver = ResolverFactory.createResolver({
+      fileSystem: cachedFS,
+      useSyncFileSystemCalls: true,
+      extensions,
+      pnpApi: {
+        resolveToUnqualified() {
+          return npath.fromPortablePath(unqualifiedPath);
+        },
+      },
+    });
+
+    const resolved = resolver.resolveSync({}, npath.fromPortablePath(issuer), npath.fromPortablePath(request));
 
     try {
       return resolveUnqualified(unqualifiedPath, {extensions});

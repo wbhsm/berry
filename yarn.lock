@@ -6218,6 +6218,7 @@ __metadata:
     "@yarnpkg/fslib": "workspace:^2.4.0"
     "@yarnpkg/libzip": "workspace:^2.2.1"
     "@yarnpkg/monorepo": "workspace:0.0.0"
+    enhanced-resolve: ^5.4.1
     tslib: ^1.13.0
     typescript: 4.1.0-beta
     webpack: ^5.1.1
@@ -11059,6 +11060,16 @@ __metadata:
     graceful-fs: ^4.2.4
     tapable: ^2.0.0
   checksum: 0cc81613ce4767c781958abf6301c3bfe3cc20ea776840c822aba6d3ac337662d3b1fb305bf291988a10e3613e8ba802afb439cb222cdd08159e7fa8686c00a6
+  languageName: node
+  linkType: hard
+
+"enhanced-resolve@npm:^5.4.1":
+  version: 5.4.1
+  resolution: "enhanced-resolve@npm:5.4.1"
+  dependencies:
+    graceful-fs: ^4.2.4
+    tapable: ^2.2.0
+  checksum: 2bc3f7b56f6e278577dd6a8b48a42befd9e8fb844a9113153713ef79e345d0747d39b6f052c3bed81ce25b1989cddf87293941490487585def2836b2f6356fa1
   languageName: node
   linkType: hard
 
@@ -25552,6 +25563,13 @@ resolve@1.9.0:
   version: 2.0.0
   resolution: "tapable@npm:2.0.0"
   checksum: e6321280f9ace1043b2d2e893b998454227f27da05e5e1f7c92a67752d6a87e2ca529aeb516f31a21c1a92d2532a77518423b7df7aaf7acd3a8df925f02b4c66
+  languageName: node
+  linkType: hard
+
+"tapable@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "tapable@npm:2.2.0"
+  checksum: f8ed725aedb3d777bf908ff06c02d1a2108667d3e64af87dd45354ac8de67e7e4fe1a567e215057fb1a2a5437b31d80cc5e5ddbb8327f7280afd4494967a9a93
   languageName: node
   linkType: hard
 
