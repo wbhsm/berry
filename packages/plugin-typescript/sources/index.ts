@@ -1,4 +1,4 @@
-import {structUtils, ThrowReport, miscUtils, Hooks as CoreHooks}                                           from '@yarnpkg/core';
+import {structUtils, ThrowReport, miscUtils, Hooks as CoreHooks, Locator, Project}                         from '@yarnpkg/core';
 import {Descriptor, Plugin, Workspace, ResolveOptions, Manifest, AllDependencies, DescriptorHash, Package} from '@yarnpkg/core';
 import {xfs, ppath, Filename}                                                                              from "@yarnpkg/fslib";
 import {suggestUtils}                                                                                      from '@yarnpkg/plugin-essentials';
@@ -129,12 +129,26 @@ const beforeWorkspacePacking = (workspace: Workspace, rawManifest: any) => {
   }
 };
 
+// TODO: Remove this and use the function on the project
+// This was copied in here so people with a custom version of the CLI can test this
+const tryWorkspaceByDescriptor = (project: Project, descriptor: Descriptor) => {
+  if (structUtils.isVirtualDescriptor(descriptor))
+    descriptor = structUtils.devirtualizeDescriptor(descriptor);
+
+  const workspace = project.tryWorkspaceByIdent(descriptor);
+
+  if (workspace === null || !workspace.accepts(descriptor.range))
+    return null;
+
+  return workspace;
+};
+
 const plugin: Plugin<EssentialsHooks & PackHooks & CoreHooks> = {
   hooks: {
     async afterAllInstalled(project) {
       for (const workspace of project.workspaces) {
         const referencedWorkspaces = miscUtils.mapAndFilter(workspace.dependencies, ([identHash, descriptor]) => {
-          const dependingWorkspace = project.tryWorkspaceByDescriptor(descriptor);
+          const dependingWorkspace = tryWorkspaceByDescriptor(project, descriptor);
           if (!dependingWorkspace || dependingWorkspace === workspace)
             return miscUtils.mapAndFilter.skip;
 
