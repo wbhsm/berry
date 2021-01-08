@@ -798,11 +798,26 @@ export function makeApi(runtimeState: RuntimeState, opts: MakeApiOptions): PnpAp
    * imports won't be computed correctly (they'll get resolved relative to "/tmp/" instead of "/tmp/foo/").
    */
 
-  function resolveRequest(request: PortablePath, issuer: PortablePath | null, {considerBuiltins, extensions}: ResolveRequestOptions = {}): PortablePath | null {
+  function resolveRequest(request: PortablePath, issuer: PortablePath | null, opts: ResolveRequestOptions = {}): PortablePath | null {
+    const {considerBuiltins, extensions = Object.keys(Module._extensions)} = opts;
     const unqualifiedPath = resolveToUnqualified(request, issuer, {considerBuiltins});
 
     if (unqualifiedPath === null)
       return null;
+
+    // TODO: remove trailing slash
+    const packageLocator = findPackageLocator(`${unqualifiedPath}/` as PortablePath);
+
+    // TODO: Let enhanced-resolve handle this as well
+    if (!packageLocator) {
+      try {
+        return resolveUnqualified(unqualifiedPath, {extensions});
+      } catch (resolutionError) {
+        if (resolutionError.pnpCode === `QUALIFIED_PATH_RESOLUTION_FAILED`)
+          Object.assign(resolutionError.data, {request: getPathForDisplay(request), issuer: issuer && getPathForDisplay(issuer)});
+        throw resolutionError;
+      }
+    }
 
     if (!issuer)
       throw new Error(`Assertion failed: expected 'resolveToUnqualified' to have filtered out null values`);
@@ -810,24 +825,40 @@ export function makeApi(runtimeState: RuntimeState, opts: MakeApiOptions): PnpAp
     const resolver = ResolverFactory.createResolver({
       fileSystem: cachedFS,
       useSyncFileSystemCalls: true,
+      conditionNames: [`node`, `require`],
       extensions,
       pnpApi: {
-        resolveToUnqualified() {
-          return npath.fromPortablePath(unqualifiedPath);
+        resolveToUnqualified(innerReq, innerIssuer, innerOpts) {
+          return npath.fromPortablePath(resolveToUnqualified(npath.toPortablePath(innerReq), npath.toPortablePath(innerIssuer), innerOpts)!);
         },
       },
     });
 
-    const resolved = resolver.resolveSync({}, npath.fromPortablePath(issuer), npath.fromPortablePath(request));
-
+    let resolved;
     try {
-      return resolveUnqualified(unqualifiedPath, {extensions});
-    } catch (resolutionError) {
-      if (resolutionError.pnpCode === `QUALIFIED_PATH_RESOLUTION_FAILED`)
-        Object.assign(resolutionError.data, {request: getPathForDisplay(request), issuer: issuer && getPathForDisplay(issuer)});
-
-      throw resolutionError;
+      resolved = resolver.resolveSync({}, npath.fromPortablePath(issuer), npath.fromPortablePath(request));
     }
+    catch {
+      throw makeError(ErrorCode.QUALIFIED_PATH_RESOLUTION_FAILED,
+        // TODO: Add candidates
+        `Qualified path resolution failed - none of the candidates can be found on the disk`,
+        {request: getPathForDisplay(request), issuer: issuer && getPathForDisplay(issuer)}
+      );
+    }
+
+    const packageInformation = getPackageInformationSafe(packageLocator);
+
+    // `enhanced-resolve` falls back to the node_modules resolution when it can't find the result in
+    // the path from resolveToUnqualified
+    if (!(resolved && resolved.startsWith(npath.fromPortablePath(packageInformation.packageLocation)))) {
+      throw makeError(ErrorCode.QUALIFIED_PATH_RESOLUTION_FAILED,
+        // TODO: Add candidates
+        `Qualified path resolution failed - none of the candidates can be found on the disk`,
+        {request: getPathForDisplay(request), issuer: issuer && getPathForDisplay(issuer)}
+      );
+    }
+
+    return npath.toPortablePath(resolved);
   }
 
   function resolveVirtual(request: PortablePath) {

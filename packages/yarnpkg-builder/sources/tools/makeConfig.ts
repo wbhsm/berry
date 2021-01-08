@@ -99,6 +99,8 @@ export const makeConfig = (config: webpack.Configuration): webpack.Configuration
     // Both of those are native dependencies of text-buffer we can't bundle
     [`fs-admin`]: `{}`,
     [`pathwatcher`]: `{}`,
+    // TODO: Needed webpack to not bundle the pnpai, remove this
+    [`pnpapi`]: `fs`,
   },
 
   plugins: [
