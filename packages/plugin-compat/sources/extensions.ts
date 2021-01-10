@@ -139,9 +139,11 @@ export const packageExtensions: Array<[string, PackageExtensionData]> = [
       eslint: `>= 6`,
       typescript: `>= 2.7`,
       webpack: `>= 4`,
+      'vue-template-compiler': `*`,
     },
     peerDependenciesMeta: {
       eslint: optionalPeerDep,
+      'vue-template-compiler': optionalPeerDep,
     },
   }],
   // https://github.com/react-component/animate/pull/89
