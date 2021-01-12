@@ -246,4 +246,14 @@ export const packageExtensions: Array<[string, PackageExtensionData]> = [
       [`prop-types`]: `*`,
     },
   }],
+  // https://github.com/rebassjs/rebass/pull/934
+  // TODO: Validate before merge
+  [`@rebass/forms@*`, {
+    dependencies: {
+      [`@styled-system/should-forward-prop`]: `^5.0.0`,
+    },
+    peerDependencies: {
+      react: `^16.8.6`,
+    },
+  }],
 ];
